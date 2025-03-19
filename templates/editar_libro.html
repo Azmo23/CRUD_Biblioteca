@@ -27,6 +27,7 @@
         <label for="yearPub">Año de Publicación:</label>
         <input type="number" class="form-control" id="yearPub" name="yearPub" value="{{ libro.yearPub }}" required>
     </div>
+    <br>
     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
     <a href="{{ url_for('consultar_libros') }}" class="btn btn-secondary">Cancelar</a>
 </form>
