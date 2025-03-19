@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Reservas Registradas</h1>
+<a href="{{ url_for('agregar_reserva') }}" class="btn btn-primary mb-3">Agregar Reserva</a>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Libro</th>
+            <th>Fecha de Reserva</th>
+
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reserva in reservas %}
+        <tr>
+            <td>{{ usuarios.find_one({"_id": reserva.usuario_id}).nombre }}</td>
+            <td>{{ libros.find_one({"_id": reserva.libro_id}).titulo }}</td>
+            <td>{{ reserva.fecha_reserva }}</td>
+
+
+            <td>
+                <a href="{{ url_for('editar_reserva', reserva_id=reserva._id) }}" class="btn btn-warning btn-sm">Editar</a>
+                <a href="{{ url_for('eliminar_reserva', reserva_id=reserva._id) }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta reserva?')">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
