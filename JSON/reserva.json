@@ -1,0 +1,7 @@
+db.reservar.insertOne({
+    "_id":789,
+    "usuario_id":123,
+    "libro_id": 12,
+    "fecha_reserva": "25-02-2025",
+
+});

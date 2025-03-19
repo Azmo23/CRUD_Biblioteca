@@ -1,0 +1,8 @@
+db.prestamos.insertOne({
+    "_id":"456",
+    "usuario_id":"123",
+    "libro_id": "112",
+    "fecha_prest": "20-02-2025",
+    "fecha_dev": "23-02-2025",
+    "estado": ["activo | devuelto"]
+});

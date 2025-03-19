@@ -1,0 +1,8 @@
+db.libro.insertOne({
+    "_id":"112",
+    "titulo": "1984",
+    "autor": "George Orwell",
+    "ISBN": "9780460812345",
+    "categoria": "ciencia ficción",
+    "ejemplares": "ejemplares"
+})
