@@ -1,253 +1,454 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from pymongo import MongoClient
-from bson.objectid import ObjectId
+from flask_mysqldb import MySQL
+from datetime import datetime, timedelta
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'tu_clave_secreta'  # Necesario para usar Flask Flash
 
-# Conexión a MongoDB
-client = MongoClient('mongodb://localhost:27017/')
-db = client['biblioteca']
+#CONFIGURACIÓN DE MariaDB
+app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST', 'localhost')
+app.config['MYSQL_USER'] = os.getenv('MYSQL_USER', 'root')
+app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD', '')
+app.config['MYSQL_DB'] = os.getenv('MYSQL_DB', 'biblioteca')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'secret_key')
+mysql = MySQL(app)
 
-# Colecciones
-usuarios = db['usuarios']
-libros = db['libros']
-reservas = db['reservas']
-prestamos = db['prestamos']
+#CONFIGURACIÓN DE MENSAJES FLASH
+app.secret_key = 'Simon2306'
+
+# Crear tablas si no existen
+def create_tables():
+    with app.app_context():
+        cur = mysql.connection.cursor()
+        
+        # Tabla usuarios
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            nombre VARCHAR(100) NOT NULL,
+            apellido VARCHAR(100) NOT NULL,
+            email VARCHAR(100) NOT NULL UNIQUE,
+            direccion VARCHAR(200) NOT NULL,
+            fechaNacimiento DATE NOT NULL
+        )
+        """)
+        
+        # Tabla libros
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS libros (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            titulo VARCHAR(200) NOT NULL,
+            autor VARCHAR(200) NOT NULL,
+            isbn VARCHAR(20) NOT NULL UNIQUE,
+            categoria VARCHAR(100) NOT NULL,
+            ejemplares INT NOT NULL
+        )
+        """)
+        
+        # Tabla prestamos
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS prestamos (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            usuario_id INT NOT NULL,
+            libro_id INT NOT NULL,
+            fechaPrestamo DATE NOT NULL,
+            fechaDevolucion DATE NOT NULL,
+            estado VARCHAR(20) NOT NULL,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+            FOREIGN KEY (libro_id) REFERENCES libros(id)
+        )
+        """)
+        
+        # Tabla reservas
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS reservas (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            usuario_id INT NOT NULL,
+            libro_id INT NOT NULL,
+            fechaReserva DATE NOT NULL,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+            FOREIGN KEY (libro_id) REFERENCES libros(id)
+        )
+        """)
+        
+        mysql.connection.commit()
+        cur.close()
+
+create_tables()
+
+# Rutas para Usuarios
+
+#RUTA PARA VER USUARIOS.
+@app.route('/usuarios')
+def usuarios():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM usuarios ORDER BY nombre ASC")
+    data = cur.fetchall()
+    cur.close()
+    return render_template('usuarios/index.html', usuarios=data)
+
+#RUTA PARA AGREGAR USUARIO.
+@app.route('/usuarios/agregar', methods=['GET', 'POST'])
+def agregar_usuario():
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        apellido = request.form['apellido']
+        email = request.form['email']
+        direccion = request.form['direccion']
+        fechaNacimiento = request.form['fechaNacimiento']
+        
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            INSERT INTO usuarios (nombre, apellido, email, direccion, fechaNacimiento)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (nombre, apellido, email, direccion, fechaNacimiento))
+        mysql.connection.commit()
+        cur.close()
+        
+        flash('Usuario agregado correctamente')
+        return redirect(url_for('usuarios'))
+    
+    return render_template('usuarios/agregar.html')
+
+#RUTA PARA EDITAR USUARIO.
+@app.route('/usuarios/editar/<id>', methods=['GET', 'POST'])
+def editar_usuario(id):
+    cur = mysql.connection.cursor()
+    
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        apellido = request.form['apellido']
+        email = request.form['email']
+        direccion = request.form['direccion']
+        fechaNacimiento = request.form['fechaNacimiento']
+        
+        cur.execute("""
+            UPDATE usuarios
+            SET nombre = %s,
+                apellido = %s,
+                email = %s,
+                direccion = %s,
+                fechaNacimiento = %s
+            WHERE id = %s
+        """, (nombre, apellido, email, direccion, fechaNacimiento, id))
+        mysql.connection.commit()
+        cur.close()
+        
+        flash('Usuario actualizado correctamente')
+        return redirect(url_for('usuarios'))
+    
+    cur.execute("SELECT * FROM usuarios WHERE id = %s", (id,))
+    data = cur.fetchone()
+    cur.close()
+    return render_template('usuarios/editar.html', usuario=data)
+
+#RUTA PARA ELIMINAR USUARIO.
+@app.route('/usuarios/eliminar/<id>')
+def eliminar_usuario(id):
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM usuarios WHERE id = %s", (id,))
+    mysql.connection.commit()
+    cur.close()
+    
+    flash('Usuario eliminado correctamente')
+    return redirect(url_for('usuarios'))
+
+# Rutas para Libros
+
+#RUTA PARA VER LIBROS.
+@app.route('/libros')
+def libros():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM libros")
+    data = cur.fetchall()
+    cur.close()
+    return render_template('libros/index.html', libros=data)
+
+#RUTA PARA AGREGAR LIBRO.
+@app.route('/libros/agregar', methods=['GET', 'POST'])
+def agregar_libro():
+    if request.method == 'POST':
+        titulo = request.form['titulo']
+        autor = request.form['autor']
+        isbn = request.form['isbn']
+        categoria = request.form['categoria']
+        ejemplares = request.form['ejemplares']
+        
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            INSERT INTO libros (titulo, autor, isbn, categoria, ejemplares)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (titulo, autor, isbn, categoria, ejemplares))
+        mysql.connection.commit()
+        cur.close()
+        
+        flash('Libro agregado correctamente')
+        return redirect(url_for('libros'))
+    
+    return render_template('libros/agregar.html')
+
+#RUTA PARA EDITAR LIBROS.
+@app.route('/libros/editar/<id>', methods=['GET', 'POST'])
+def editar_libro(id):
+    cur = mysql.connection.cursor()
+    
+    if request.method == 'POST':
+        titulo = request.form['titulo']
+        autor = request.form['autor']
+        isbn = request.form['isbn']
+        categoria = request.form['categoria']
+        ejemplares = request.form['ejemplares']
+        
+        cur.execute("""
+            UPDATE libros
+            SET titulo = %s,
+                autor = %s,
+                isbn = %s,
+                categoria = %s,
+                ejemplares = %s
+            WHERE id = %s
+        """, (titulo, autor, isbn, categoria, ejemplares, id))
+        mysql.connection.commit()
+        cur.close()
+        
+        flash('Libro actualizado correctamente')
+        return redirect(url_for('libros'))
+    
+    cur.execute("SELECT * FROM libros WHERE id = %s", (id,))
+    data = cur.fetchone()
+    cur.close()
+    return render_template('libros/editar.html', libro=data)
+
+#RUTA PARA ELIMINAR LIBRO.
+@app.route('/libros/eliminar/<id>')
+def eliminar_libro(id):
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM libros WHERE id = %s", (id,))
+    mysql.connection.commit()
+    cur.close()
+    
+    flash('Libro eliminado correctamente')
+    return redirect(url_for('libros'))
+
+# Rutas para Prestamos
+@app.route('/prestamos')
+def prestamos():
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        SELECT p.id, u.nombre, u.apellido, l.titulo, p.fechaPrestamo, p.fechaDevolucion, p.estado
+        FROM prestamos p
+        JOIN usuarios u ON p.usuario_id = u.id
+        JOIN libros l ON p.libro_id = l.id
+    """)
+    data = cur.fetchall()
+    cur.close()
+    return render_template('prestamos/index.html', prestamos=data)
+
+#RUTA PARA AGREGAR PRESTAMO
+@app.route('/prestamos/agregar', methods=['GET', 'POST'])
+def agregar_prestamo():
+    cur = mysql.connection.cursor()
+    
+    if request.method == 'POST':
+        usuario_id = request.form['usuario_id']
+        libro_id = request.form['libro_id']
+        fechaPrestamo = request.form['fechaPrestamo']
+        fechaDevolucion = (datetime.strptime(fechaPrestamo, '%Y-%m-%d') + timedelta(days=7)).strftime('%Y-%m-%d')
+        estado = 'Pendiente'
+        
+        # Verificar disponibilidad del libro
+        cur.execute("SELECT ejemplares FROM libros WHERE id = %s", (libro_id,))
+        ejemplares = cur.fetchone()[0]
+        
+        if ejemplares > 0:
+            # Actualizar ejemplares disponibles
+            cur.execute("UPDATE libros SET ejemplares = ejemplares - 1 WHERE id = %s", (libro_id,))
+            
+            # Crear préstamo
+            cur.execute("""
+                INSERT INTO prestamos (usuario_id, libro_id, fechaPrestamo, fechaDevolucion, estado)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (usuario_id, libro_id, fechaPrestamo, fechaDevolucion, estado))
+            
+            mysql.connection.commit()
+            flash('Préstamo registrado correctamente')
+        else:
+            flash('No hay ejemplares disponibles de este libro', 'error')
+        
+        cur.close()
+        return redirect(url_for('prestamos'))
+    
+    # Obtener usuarios y libros para el formulario
+    cur.execute("SELECT id, nombre, apellido FROM usuarios")
+    usuarios = cur.fetchall()
+    
+    cur.execute("SELECT id, titulo FROM libros WHERE ejemplares > 0")
+    libros = cur.fetchall()
+    
+    cur.close()
+    return render_template('prestamos/agregar.html', usuarios=usuarios, libros=libros)
+
+#RUTA PARA EDITAR PRESTAMOS.
+@app.route('/prestamos/editar/<id>', methods=['GET', 'POST'])
+def editar_prestamo(id):
+    cur = mysql.connection.cursor()
+    
+    if request.method == 'POST':
+        usuario_id = request.form['usuario_id']
+        libro_id = request.form['libro_id']
+        fechaPrestamo = request.form['fechaPrestamo']
+        fechaDevolucion = request.form['fechaDevolucion']
+        estado = request.form['estado']
+        
+        cur.execute("""
+            UPDATE prestamos
+            SET usuario_id = %s,
+                libro_id = %s,
+                fechaPrestamo = %s,
+                fechaDevolucion = %s,
+                estado = %s
+            WHERE id = %s
+        """, (usuario_id, libro_id, fechaPrestamo, fechaDevolucion, estado, id))
+        mysql.connection.commit()
+        cur.close()
+        
+        flash('Préstamo actualizado correctamente')
+        return redirect(url_for('prestamos'))
+    
+    # Obtener datos del préstamo
+    cur.execute("SELECT * FROM prestamos WHERE id = %s", (id,))
+    prestamo = cur.fetchone()
+    
+    # Obtener usuarios y libros para el formulario
+    cur.execute("SELECT id, nombre, apellido FROM usuarios")
+    usuarios = cur.fetchall()
+    
+    cur.execute("SELECT id, titulo FROM libros")
+    libros = cur.fetchall()
+    
+    cur.close()
+    return render_template('prestamos/editar.html', prestamo=prestamo, usuarios=usuarios, libros=libros)
+
+#RUTA PARA ELIMINAR PRESTAMO.
+@app.route('/prestamos/eliminar/<id>')
+def eliminar_prestamo(id):
+    cur = mysql.connection.cursor()
+    
+    # Obtener libro_id para actualizar ejemplares
+    cur.execute("SELECT libro_id FROM prestamos WHERE id = %s", (id,))
+    libro_id = cur.fetchone()[0]
+    
+    # Eliminar préstamo
+    cur.execute("DELETE FROM prestamos WHERE id = %s", (id,))
+    
+    # Actualizar ejemplares disponibles
+    cur.execute("UPDATE libros SET ejemplares = ejemplares + 1 WHERE id = %s", (libro_id,))
+    
+    mysql.connection.commit()
+    cur.close()
+    
+    flash('Préstamo eliminado correctamente')
+    return redirect(url_for('prestamos'))
+
+# Rutas para Reservas
+@app.route('/reservas')
+def reservas():
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        SELECT r.id, u.nombre, u.apellido, l.titulo, r.fechaReserva
+        FROM reservas r
+        JOIN usuarios u ON r.usuario_id = u.id
+        JOIN libros l ON r.libro_id = l.id
+    """)
+    data = cur.fetchall()
+    cur.close()
+    return render_template('reservas/index.html', reservas=data)
+
+#RUTA PARA AGREGAR RESERVA.
+@app.route('/reservas/agregar', methods=['GET', 'POST'])
+def agregar_reserva():
+    cur = mysql.connection.cursor()
+    
+    if request.method == 'POST':
+        usuario_id = request.form['usuario_id']
+        libro_id = request.form['libro_id']
+        fechaReserva = request.form['fechaReserva']
+        
+        cur.execute("""
+            INSERT INTO reservas (usuario_id, libro_id, fechaReserva)
+            VALUES (%s, %s, %s)
+        """, (usuario_id, libro_id, fechaReserva))
+        mysql.connection.commit()
+        cur.close()
+        
+        flash('Reserva registrada correctamente')
+        return redirect(url_for('reservas'))
+    
+    # Obtener usuarios y libros para el formulario
+    cur.execute("SELECT id, nombre, apellido FROM usuarios")
+    usuarios = cur.fetchall()
+    
+    cur.execute("SELECT id, titulo FROM libros")
+    libros = cur.fetchall()
+    
+    cur.close()
+    return render_template('reservas/agregar.html', usuarios=usuarios, libros=libros)
+
+#RUTA PARA EDITAR RESERVA.
+@app.route('/reservas/editar/<id>', methods=['GET', 'POST'])
+def editar_reserva(id):
+    cur = mysql.connection.cursor()
+    
+    if request.method == 'POST':
+        usuario_id = request.form['usuario_id']
+        libro_id = request.form['libro_id']
+        fechaReserva = request.form['fechaReserva']
+        
+        cur.execute("""
+            UPDATE reservas
+            SET usuario_id = %s,
+                libro_id = %s,
+                fechaReserva = %s
+            WHERE id = %s
+        """, (usuario_id, libro_id, fechaReserva, id))
+        mysql.connection.commit()
+        cur.close()
+        
+        flash('Reserva actualizada correctamente')
+        return redirect(url_for('reservas'))
+    
+    # Obtener datos de la reserva
+    cur.execute("SELECT * FROM reservas WHERE id = %s", (id,))
+    reserva = cur.fetchone()
+    
+    # Obtener usuarios y libros para el formulario
+    cur.execute("SELECT id, nombre, apellido FROM usuarios")
+    usuarios = cur.fetchall()
+    
+    cur.execute("SELECT id, titulo FROM libros")
+    libros = cur.fetchall()
+    
+    cur.close()
+    return render_template('reservas/editar.html', reserva=reserva, usuarios=usuarios, libros=libros)
+
+#RUTA PARA ELIMINAR RESERVA.
+@app.route('/reservas/eliminar/<id>')
+def eliminar_reserva(id):
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM reservas WHERE id = %s", (id,))
+    mysql.connection.commit()
+    cur.close()
+    
+    flash('Reserva eliminada correctamente')
+    return redirect(url_for('reservas'))
 
 # Ruta principal
 @app.route('/')
 def index():
-    return render_template('index.html')
-
-# Ruta para registrar usuarios
-@app.route('/registrar_usuario', methods=['GET', 'POST'])
-def registrar_usuario():
-    if request.method == 'POST':
-        nombre = request.form['nombre']
-        email = request.form['email']
-        telefono = request.form['telefono']
-        direccion = request.form['direccion']
-        
-        usuarios.insert_one({
-            "nombre": nombre,
-            "email": email,
-            "telefono": telefono,
-            "direccion": direccion
-        })
-        flash('Usuario registrado correctamente', 'success')
-        return redirect(url_for('index'))
-    return render_template('registrar_usuario.html')
-
-# Ruta para ver usuarios
-@app.route('/ver_usuarios')
-def ver_usuarios():
-    usuarios_lista = list(usuarios.find())
-    return render_template('ver_usuarios.html', usuarios=usuarios_lista)
-
-# Ruta para editar un usuario
-@app.route('/editar_usuario/<usuario_id>', methods=['GET', 'POST'])
-def editar_usuario(usuario_id):
-    if request.method == 'POST':
-        nombre = request.form['nombre']
-        email = request.form['email']
-        telefono = request.form['telefono']
-        direccion = request.form['direccion']
-        usuarios.update_one(
-            {"_id": ObjectId(usuario_id)},
-            {"$set": {
-                "nombre": nombre,
-                "email": email,
-                "telefono": telefono,
-                "direccion": direccion
-            }}
-        )
-        flash('Usuario actualizado correctamente', 'success')
-        return redirect(url_for('ver_usuarios'))
-    else:
-        usuario = usuarios.find_one({"_id": ObjectId(usuario_id)})
-        return render_template('editar_usuario.html', usuario=usuario)
-
-# Ruta para eliminar un usuario
-@app.route('/eliminar_usuario/<usuario_id>')
-def eliminar_usuario(usuario_id):
-    usuarios.delete_one({"_id": ObjectId(usuario_id)})
-    flash('Usuario eliminado correctamente', 'success')
-    return redirect(url_for('ver_usuarios'))
-
-# Ruta para ingresar libros
-@app.route('/ingresar_libro', methods=['GET', 'POST'])
-def ingresar_libro():
-    if request.method == 'POST':
-        titulo = request.form['titulo']
-        autor = request.form['autor']
-        isbn = request.form['isbn']
-        genero = request.form['genero']
-        yearPub = request.form['yearPub']
-        ejemplares = int(request.form['ejemplares'])
-        libros.insert_one({
-            "titulo": titulo,
-            "autor": autor,
-            "ejemplares": ejemplares,
-            "isbn": isbn,
-            "genero": genero,
-            "yearPub": yearPub
-        })
-        flash('Libro ingresado correctamente', 'success')
-        return redirect(url_for('index'))
-    return render_template('ingresar_libro.html')
-
-# Ruta para editar un libro
-@app.route('/editar_libro/<libro_id>', methods=['GET', 'POST'])
-def editar_libro(libro_id):
-    if request.method == 'POST':
-        titulo = request.form['titulo']
-        autor = request.form['autor']
-        isbn = request.form['isbn']
-        genero = request.form['genero']
-        yearPub = request.form['yearPub']
-        ejemplares = int(request.form['ejemplares'])
-        libros.update_one(
-            {"_id": ObjectId(libro_id)},
-            {"$set": {
-                "titulo": titulo,
-                "autor": autor,
-                "ejemplares": ejemplares,
-                "isbn": isbn,
-                "genero": genero,
-                "yearPub": yearPub
-            }}
-        )
-        flash('Libro actualizado correctamente', 'success')
-        return redirect(url_for('consultar_libros'))
-    else:
-        libro = libros.find_one({"_id": ObjectId(libro_id)})
-        return render_template('editar_libro.html', libro=libro)
-
-# Ruta para eliminar un libro
-@app.route('/eliminar_libro/<libro_id>')
-def eliminar_libro(libro_id):
-    libros.delete_one({"_id": ObjectId(libro_id)})
-    flash('Libro eliminado correctamente', 'success')
-    return redirect(url_for('consultar_libros'))
-
-# Ruta para consultar libros
-@app.route('/consultar_libros')
-def consultar_libros():
-    libros_lista = list(libros.find())
-    return render_template('consultar_libros.html', libros=libros_lista)
-
-# Ruta para agregar reservas
-@app.route('/agregar_reserva', methods=['GET', 'POST'])
-def agregar_reserva():
-    if request.method == 'POST':
-        usuario_id = request.form['usuario_id']
-        libro_id = request.form['libro_id']
-        fecha_reserva = request.form['fecha_reserva']
-        
-        reservas.insert_one({
-            "usuario_id": ObjectId(usuario_id),
-            "libro_id": ObjectId(libro_id),
-            "fecha_reserva": fecha_reserva,
-
-        })
-        flash('Reserva agregada correctamente', 'success')
-        return redirect(url_for('ver_reservas'))
-    return render_template('agregar_reserva.html', usuarios=usuarios.find(), libros=libros.find())
-
-# Ruta para ver reservas
-@app.route('/ver_reservas')
-def ver_reservas():
-    reservas_lista = list(reservas.find())
-    return render_template('ver_reservas.html', reservas=reservas_lista, usuarios=usuarios, libros=libros)
-
-# Ruta para editar reservas
-@app.route('/editar_reserva/<reserva_id>', methods=['GET', 'POST'])
-def editar_reserva(reserva_id):
-    if request.method == 'POST':
-        usuario_id = request.form['usuario_id']
-        libro_id = request.form['libro_id']
-        fecha_reserva = request.form['fecha_reserva']
-
-        reservas.update_one(
-            {"_id": ObjectId(reserva_id)},
-            {"$set": {
-                "usuario_id": ObjectId(usuario_id),
-                "libro_id": ObjectId(libro_id),
-                "fecha_reserva": fecha_reserva,
-
-            }}
-        )
-        flash('Reserva actualizada correctamente', 'success')
-        return redirect(url_for('ver_reservas'))
-    else:
-        reserva = reservas.find_one({"_id": ObjectId(reserva_id)})
-        return render_template('editar_reserva.html', reserva=reserva, usuarios=usuarios.find(), libros=libros.find())
-
-# Ruta para eliminar reservas
-@app.route('/eliminar_reserva/<reserva_id>')
-def eliminar_reserva(reserva_id):
-    reservas.delete_one({"_id": ObjectId(reserva_id)})
-    flash('Reserva eliminada correctamente', 'success')
-    return redirect(url_for('ver_reservas'))
-
-# Ruta para agregar préstamos
-@app.route('/agregar_prestamo', methods=['GET', 'POST'])
-def agregar_prestamo():
-    if request.method == 'POST':
-        usuario_id = request.form['usuario_id']
-        libro_id = request.form['libro_id']
-        fecha_prestamo = request.form['fecha_prestamo']
-        fecha_devolucion = request.form['fecha_devolucion']
-        estado = request.form['estado']
-        prestamos.insert_one({
-            "usuario_id": ObjectId(usuario_id),
-            "libro_id": ObjectId(libro_id),
-            "fecha_prestamo": fecha_prestamo,
-            "fecha_devolucion": fecha_devolucion,
-            "estado": estado
-        })
-        flash('Préstamo agregado correctamente', 'success')
-        return redirect(url_for('ver_prestamos'))
-    return render_template('agregar_prestamo.html', usuarios=usuarios.find(), libros=libros.find())
-
-# Ruta para ver préstamos
-@app.route('/ver_prestamos')
-def ver_prestamos():
-    prestamos_lista = list(prestamos.find())
-    return render_template('ver_prestamos.html', prestamos=prestamos_lista, usuarios=usuarios, libros=libros)
-
-# Ruta para editar préstamos
-@app.route('/editar_prestamo/<prestamo_id>', methods=['GET', 'POST'])
-def editar_prestamo(prestamo_id):
-    if request.method == 'POST':
-        usuario_id = request.form['usuario_id']
-        libro_id = request.form['libro_id']
-        fecha_prestamo = request.form['fecha_prestamo']
-        fecha_devolucion = request.form['fecha_devolucion']
-        estado = request.form['estado']
-        prestamos.update_one(
-            {"_id": ObjectId(prestamo_id)},
-            {"$set": {
-                "usuario_id": ObjectId(usuario_id),
-                "libro_id": ObjectId(libro_id),
-                "fecha_prestamo": fecha_prestamo,
-                "fecha_devolucion": fecha_devolucion,
-                "estado": estado
-            }}
-        )
-        flash('Préstamo actualizado correctamente', 'success')
-        return redirect(url_for('ver_prestamos'))
-    else:
-        prestamo = prestamos.find_one({"_id": ObjectId(prestamo_id)})
-        return render_template('editar_prestamo.html', prestamo=prestamo, usuarios=usuarios.find(), libros=libros.find())
-
-# Ruta para eliminar préstamos
-@app.route('/eliminar_prestamo/<prestamo_id>')
-def eliminar_prestamo(prestamo_id):
-    prestamos.delete_one({"_id": ObjectId(prestamo_id)})
-    flash('Préstamo eliminado correctamente', 'success')
-    return redirect(url_for('ver_prestamos'))
+    return render_template('base.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
