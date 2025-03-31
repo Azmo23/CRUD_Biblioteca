@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Libros Disponibles</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Autor</th>
+            <th>Ejemplares</th>
+            <th>ISBN</th>
+            <th>Año</th>
+            <th>Generos</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for libro in libros %}
+        <tr>
+            <td>{{ libro.titulo }}</td>
+            <td>{{ libro.autor }}</td>
+            <td>{{ libro.ejemplares }}</td>
+            <td>{{ libro.isbn }}</td>
+            <td>{{ libro.yearPub }}</td>
+            <td>{{ libro.genero }}</td>
+            <td>
+                <a href="{{ url_for('editar_libro', libro_id=libro._id) }}" class="btn btn-warning btn-sm">Editar</a>
+                <a href="{{ url_for('eliminar_libro', libro_id=libro._id) }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este libro?')">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

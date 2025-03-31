@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Ingresar Libro</h1>
+<form method="POST">
+    <div class="form-group">
+        <label for="titulo">Título:</label>
+        <input type="text" class="form-control" id="titulo" name="titulo" required>
+    </div>
+    <div class="form-group">
+        <label for="autor">Autor:</label>
+        <input type="text" class="form-control" id="autor" name="autor" required>
+    </div>
+    <div class="form-group">
+        <label for="ejemplares">Ejemplares:</label>
+        <input type="number" class="form-control" id="ejemplares" name="ejemplares" required>
+    </div>
+    <div>
+        <label for="isbn">ISBN:</label>
+        <input type="text" class="form-control" id="isbn" name="isbn" required>
+    </div>
+    <div>
+        <label for="genero">Genero:</label>
+        <input type="text" class="form-control" id="genero" name="genero" required>
+    </div>
+    <div>
+        <label for="yearPub">Año de Publicación:</label>
+        <input type="number" class="form-control" id="yearPub" name="yearPub" required>
+    </div>
+    <br>
+    <button type="submit" class="btn btn-primary">Ingresar</button>
+</form>
+{% endblock %}
