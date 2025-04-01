@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Lista de Reservas</h1>
+<a href="{{ url_for('agregar_reserva') }}" class="btn btn-primary mb-3">Agregar Reserva</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Libro</th>
+            <th>Fecha Reserva</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reserva in reservas %}
+        <tr>
+            <td>{{ reserva[0] }}</td>
+            <td>{{ reserva[1] }} {{ reserva[2] }}</td>
+            <td>{{ reserva[3] }}</td>
+            <td>{{ reserva[4] }}</td>
+            <td>
+                <a href="{{ url_for('editar_reserva', id=reserva[0]) }}" class="btn btn-warning btn-sm">Editar</a>
+                <a href="{{ url_for('eliminar_reserva', id=reserva[0]) }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro?')">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
