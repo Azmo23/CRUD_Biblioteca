@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Lista de Préstamos</h1>
+<a href="{{ url_for('agregar_prestamo') }}" class="btn btn-primary mb-3">Agregar Préstamo</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Libro</th>
+            <th>Fecha Préstamo</th>
+            <th>Fecha Devolución</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for prestamo in prestamos %}
+        <tr>
+            <td>{{ prestamo[0] }}</td>
+            <td>{{ prestamo[1] }} {{ prestamo[2] }}</td>
+            <td>{{ prestamo[3] }}</td>
+            <td>{{ prestamo[4] }}</td>
+            <td>{{ prestamo[5] }}</td>
+            <td>{{ prestamo[6] }}</td>
+            <td>
+                <a href="{{ url_for('editar_prestamo', id=prestamo[0]) }}" class="btn btn-warning btn-sm">Editar</a>
+                <a href="{{ url_for('eliminar_prestamo', id=prestamo[0]) }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro?')">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
