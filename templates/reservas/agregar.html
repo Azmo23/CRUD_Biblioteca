@@ -3,28 +3,29 @@
 {% block content %}
 <h1>Agregar Reserva</h1>
 <form method="POST">
-    <div class="form-group">
-        <label for="usuario_id">Usuario:</label>
-        <select class="form-control" id="usuario_id" name="usuario_id" required>
+    <div class="mb-3">
+        <label for="usuario_id" class="form-label">Usuario</label>
+        <select class="form-select" id="usuario_id" name="usuario_id" required>
+            <option value="">Seleccione un usuario</option>
             {% for usuario in usuarios %}
-            <option value="{{ usuario._id }}">{{ usuario.nombre }}</option>
+            <option value="{{ usuario[0] }}">{{ usuario[1] }} {{ usuario[2] }}</option>
             {% endfor %}
         </select>
     </div>
-    <div class="form-group">
-        <label for="libro_id">Libro:</label>
-        <select class="form-control" id="libro_id" name="libro_id" required>
+    <div class="mb-3">
+        <label for="libro_id" class="form-label">Libro</label>
+        <select class="form-select" id="libro_id" name="libro_id" required>
+            <option value="">Seleccione un libro</option>
             {% for libro in libros %}
-            <option value="{{ libro._id }}">{{ libro.titulo }}</option>
+            <option value="{{ libro[0] }}">{{ libro[1] }}</option>
             {% endfor %}
         </select>
     </div>
-    <div class="form-group">
-        <label for="fecha_reserva">Fecha de Reserva:</label>
-        <input type="date" class="form-control" id="fecha_reserva" name="fecha_reserva" required>
+    <div class="mb-3">
+        <label for="fechaReserva" class="form-label">Fecha de Reserva</label>
+        <input type="date" class="form-control" id="fechaReserva" name="fechaReserva" required>
     </div>
-    <br>
-
-    <button type="submit" class="btn btn-primary">Agregar</button>
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <a href="{{ url_for('reservas') }}" class="btn btn-secondary">Cancelar</a>
 </form>
 {% endblock %}
