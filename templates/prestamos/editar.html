@@ -3,35 +3,39 @@
 {% block content %}
 <h1>Editar Préstamo</h1>
 <form method="POST">
-    <div class="form-group">
-        <label for="usuario_id">Usuario:</label>
-        <select class="form-control" id="usuario_id" name="usuario_id" required>
+    <div class="mb-3">
+        <label for="usuario_id" class="form-label">Usuario</label>
+        <select class="form-select" id="usuario_id" name="usuario_id" required>
             {% for usuario in usuarios %}
-            <option value="{{ usuario._id }}" {% if usuario._id == prestamo.usuario_id %}selected{% endif %}>{{ usuario.nombre }}</option>
+            <option value="{{ usuario[0] }}" {% if usuario[0] == prestamo[1] %}selected{% endif %}>{{ usuario[1] }} {{ usuario[2] }}</option>
             {% endfor %}
         </select>
     </div>
-    <div class="form-group">
-        <label for="libro_id">Libro:</label>
-        <select class="form-control" id="libro_id" name="libro_id" required>
+    <div class="mb-3">
+        <label for="libro_id" class="form-label">Libro</label>
+        <select class="form-select" id="libro_id" name="libro_id" required>
             {% for libro in libros %}
-            <option value="{{ libro._id }}" {% if libro._id == prestamo.libro_id %}selected{% endif %}>{{ libro.titulo }}</option>
+            <option value="{{ libro[0] }}" {% if libro[0] == prestamo[2] %}selected{% endif %}>{{ libro[1] }}</option>
             {% endfor %}
         </select>
     </div>
-    <div class="form-group">
-        <label for="fecha_prestamo">Fecha de Préstamo:</label>
-        <input type="date" class="form-control" id="fecha_prestamo" name="fecha_prestamo" value="{{ prestamo.fecha_prestamo }}" required>
+    <div class="mb-3">
+        <label for="fechaPrestamo" class="form-label">Fecha de Préstamo</label>
+        <input type="date" class="form-control" id="fechaPrestamo" name="fechaPrestamo" value="{{ prestamo[3] }}" required>
     </div>
-    <div class="form-group">
-        <label for="fecha_devolucion">Fecha de Devolución:</label>
-        <input type="date" class="form-control" id="fecha_devolucion" name="fecha_devolucion" value="{{ prestamo.fecha_devolucion }}" required>
+    <div class="mb-3">
+        <label for="fechaDevolucion" class="form-label">Fecha de Devolución</label>
+        <input type="date" class="form-control" id="fechaDevolucion" name="fechaDevolucion" value="{{ prestamo[4] }}" required>
     </div>
-    <div class="form-group">
-        <label for="estado">Estado:</label>
-        <input type="text" class="form-control" id="estado" name="estado" value="{{ prestamo.estado }}" required>
+    <div class="mb-3">
+        <label for="estado" class="form-label">Estado</label>
+        <select class="form-select" id="estado" name="estado" required>
+            <option value="Pendiente" {% if prestamo[5] == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+            <option value="Devuelto" {% if prestamo[5] == 'Devuelto' %}selected{% endif %}>Devuelto</option>
+            <option value="Atrasado" {% if prestamo[5] == 'Atrasado' %}selected{% endif %}>Atrasado</option>
+        </select>
     </div>
-    <br>
-    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    <button type="submit" class="btn btn-primary">Actualizar</button>
+    <a href="{{ url_for('prestamos') }}" class="btn btn-secondary">Cancelar</a>
 </form>
 {% endblock %}
