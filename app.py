@@ -13,7 +13,7 @@ app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST', 'localhost')
 app.config['MYSQL_USER'] = os.getenv('MYSQL_USER', 'root')
 app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD', '')
 app.config['MYSQL_DB'] = os.getenv('MYSQL_DB', 'biblioteca')
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'secret_key')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'Simon2306')
 mysql = MySQL(app)
 
 #CONFIGURACIÓN DE MENSAJES FLASH
@@ -79,6 +79,47 @@ def create_tables():
 
 create_tables()
 
+@app.route('/')
+def index():
+    cur = mysql.connection.cursor()
+    
+    # Obtener estadísticas
+    cur.execute("SELECT COUNT(*) FROM usuarios")
+    total_usuarios = cur.fetchone()[0]
+    
+    cur.execute("SELECT COUNT(*) FROM libros")
+    total_libros = cur.fetchone()[0]
+    
+    cur.execute("SELECT COUNT(*) FROM prestamos WHERE estado = 'Pendiente'")
+    prestamos_pendientes = cur.fetchone()[0]
+    
+    cur.execute("SELECT COUNT(*) FROM reservas")
+    total_reservas = cur.fetchone()[0]
+    
+    # Obtener últimos préstamos
+    cur.execute("""
+        SELECT p.id, u.nombre, u.apellido, l.titulo, p.fechaPrestamo, p.fechaDevolucion, p.estado
+        FROM prestamos p
+        JOIN usuarios u ON p.usuario_id = u.id
+        JOIN libros l ON p.libro_id = l.id
+        ORDER BY p.fechaPrestamo DESC
+        LIMIT 5
+    """)
+    ultimos_prestamos = cur.fetchall()
+    
+    # Obtener últimos libros agregados
+    cur.execute("SELECT * FROM libros ORDER BY id DESC LIMIT 5")
+    ultimos_libros = cur.fetchall()
+    
+    cur.close()
+    
+    return render_template('index.html', 
+                        total_usuarios=total_usuarios,
+                        total_libros=total_libros,
+                        prestamos_pendientes=prestamos_pendientes,
+                        total_reservas=total_reservas,
+                        ultimos_prestamos=ultimos_prestamos,
+                        ultimos_libros=ultimos_libros)
 # Rutas para Usuarios
 
 #RUTA PARA VER USUARIOS.
@@ -446,7 +487,7 @@ def eliminar_reserva(id):
     return redirect(url_for('reservas'))
 
 # Ruta principal
-@app.route('/')
+
 def index():
     return render_template('base.html')
 
