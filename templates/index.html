@@ -1,35 +1,113 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="text-center">
-    <h1 class="display-4">Bienvenido a la Biblioteca!</h1>
-    <p class="lead">Gestiona usuarios, libros y préstamos de manera fácil y rápida.</p>
-    <div class="row mt-5">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Libros</h5>
-                    <p class="card-text">{{ total_libros }} libros registrados</p>
-                    <a href="{{ url_for('consultar_libros') }}" class="btn btn-primary">Ver Libros</a>
-                </div>
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Usuarios</h5>
+                <p class="card-text display-6">{{ total_usuarios }}</p>
+                <a href="{{ url_for('usuarios') }}" class="btn btn-light">Ver todos</a>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Usuarios</h5>
-                    <p class="card-text">{{ total_usuarios }} usuarios registrados</p>
-                    <a href="{{ url_for('registrar_usuario') }}" class="btn btn-primary">Ver Usuarios</a>
-                </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Libros</h5>
+                <p class="card-text display-6">{{ total_libros }}</p>
+                <a href="{{ url_for('libros') }}" class="btn btn-light">Ver todos</a>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Préstamos</h5>
-                    <p class="card-text">{{ total_prestamos }} préstamos activos</p>
-                    <a href="{{ url_for('ver_prestamos') }}" class="btn btn-primary">Ver Préstamos</a>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <h5 class="card-title">Préstamos Pendientes</h5>
+                <p class="card-text display-6">{{ prestamos_pendientes }}</p>
+                <a href="{{ url_for('prestamos') }}" class="btn btn-light">Ver todos</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title">Reservas Activas</h5>
+                <p class="card-text display-6">{{ total_reservas }}</p>
+                <a href="{{ url_for('reservas') }}" class="btn btn-light">Ver todos</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5>Últimos Préstamos</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Libro</th>
+                                <th>Devolución</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prestamo in ultimos_prestamos %}
+                            <tr>
+                                <td>{{ prestamo[1] }} {{ prestamo[2] }}</td>
+                                <td>{{ prestamo[3] }}</td>
+                                <td>{{ prestamo[5] }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if prestamo[6] == 'Pendiente' %}bg-warning
+                                        {% elif prestamo[6] == 'Devuelto' %}bg-success
+                                        {% else %}bg-danger{% endif %}">
+                                        {{ prestamo[6] }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
+                <a href="{{ url_for('prestamos') }}" class="btn btn-primary">Ver todos los préstamos</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5>Últimos Libros Agregados</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Autor</th>
+                                <th>Disponibles</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for libro in ultimos_libros %}
+                            <tr>
+                                <td>{{ libro[1] }}</td>
+                                <td>{{ libro[2] }}</td>
+                                <td>{{ libro[5] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <a href="{{ url_for('libros') }}" class="btn btn-primary">Ver todos los libros</a>
             </div>
         </div>
     </div>
