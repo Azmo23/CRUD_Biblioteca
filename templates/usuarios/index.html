@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1><i class="bi bi-people-fill"></i> Gestión de Usuarios</h1>
-<a href="/usuarios/agregar" class="btn btn-primary mb-3">
+<a href="{{ url_for('agregar_usuario') }}" class="btn btn-primary mb-3">
     <i class="bi bi-plus-circle"></i> Nuevo Usuario
 </a>
 
@@ -22,12 +22,12 @@
             <td>{{ usuario.email }}</td>
             <td>{{ usuario.direccion }}</td>
             <td>
-                <a href="/usuarios/editar/{{ usuario._id }}" class="btn btn-warning btn-sm">
-                    <i class="bi bi-pencil-square"></i>
+                <a href="{{ url_for('editar_usuario', id=usuario._id) }}" class="btn btn-warning btn-sm">
+                    <i class="bi bi-pencil-square"></i> Editar
                 </a>
-                <a href="/usuarios/eliminar/{{ usuario._id }}" class="btn btn-danger btn-sm" 
+                <a href="{{ url_for('eliminar_usuario', id=usuario._id) }}" class="btn btn-danger btn-sm" 
                     onclick="return confirm('¿Eliminar este usuario?')">
-                    <i class="bi bi-trash"></i>
+                    <i class="bi bi-trash"></i> Eliminar
                 </a>
             </td>
         </tr>
