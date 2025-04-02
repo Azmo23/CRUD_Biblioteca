@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1><i class="bi bi-calendar-check"></i> Reservas Activas</h1>
+
+<a href="{{ url_for('agregar_reserva') }}" class="btn btn-primary mb-3">
+    <i class="bi bi-plus-circle"></i> Nueva Reserva
+</a>
+
+<table class="table table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Usuario</th>
+            <th>Libro</th>
+            <th>Fecha Reserva</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reserva in reservas %}
+        <tr>
+            <td>{{ reserva.usuario[0].nombre }} {{ reserva.usuario[0].apellido }}</td>
+            <td>{{ reserva.libro[0].titulo }}</td>
+            <td>{{ reserva.fechaReserva }}</td>
+            <td>
+                <a href="{{ url_for('editar_reserva', id=reserva._id) }}" class="btn btn-sm btn-warning">
+                    <i class="bi bi-pencil"></i>
+                </a>
+                <a href="{{ url_for('eliminar_reserva', id=reserva._id) }}" class="btn btn-sm btn-danger"
+                    onclick="return confirm('¿Cancelar esta reserva?')">
+                    <i class="bi bi-trash"></i>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
