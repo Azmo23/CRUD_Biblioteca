@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1><i class="bi bi-book"></i> Catálogo de Libros</h1>
+
+<div class="d-flex justify-content-between mb-3">
+    <a href="{{ url_for('agregar_libro') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nuevo Libro
+    </a>
+    <form class="d-flex" method="GET" action="{{ url_for('libros') }}">
+        <input class="form-control me-2" type="search" name="q" 
+                placeholder="Buscar por título..." value="{{ request.args.get('q', '') }}">
+        <button class="btn btn-outline-primary" type="submit">
+            <i class="bi bi-search"></i>
+        </button>
+    </form>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Título</th>
+                <th>Autor</th>
+                <th>Disponibilidad</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for libro in libros %}
+            <tr>
+                <td>{{ libro.titulo }}</td>
+                <td>{{ libro.autor }}</td>
+                <td>
+                    <span class="badge bg-{{ 'success' if libro.disponibles > 0 else 'danger' }}">
+                        {{ libro.disponibles }} / {{ libro.ejemplares }} disponibles
+                    </span>
+                </td>
+                <td>
+                    <div class="btn-group">
+                        <a href="{{ url_for('editar_libro', id=libro._id) }}" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil"></i> Editar
+                        </a>
+                        <a href="{{ url_for('eliminar_libro', id=libro._id) }}" class="btn btn-sm btn-danger"
+                            onclick="return confirm('¿Eliminar este libro?')">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
