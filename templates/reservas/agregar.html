@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1><i class="bi bi-calendar-plus"></i> Nueva Reserva</h1>
+
+<form method="POST" action="{{ url_for('agregar_reserva') }}">
+    <div class="mb-3">
+        <label class="form-label">Usuario*</label>
+        <select class="form-select" name="usuario_id" required>
+            <option value="">Seleccionar usuario...</option>
+            {% for usuario in usuarios %}
+            <option value="{{ usuario._id }}">
+                {{ usuario.nombre }} {{ usuario.apellido }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Libro*</label>
+        <select class="form-select" name="libro_id" required>
+            <option value="">Seleccionar libro...</option>
+            {% for libro in libros %}
+            <option value="{{ libro._id }}">
+                {{ libro.titulo }} ({{ libro.autor }})
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Fecha Reserva*</label>
+        <input type="date" class="form-control" name="fechaReserva" 
+                value="{{ hoy }}" required>
+    </div>
+    
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-save"></i> Guardar
+    </button>
+    <a href="{{ url_for('reservas') }}" class="btn btn-secondary">
+        <i class="bi bi-x-circle"></i> Cancelar
+    </a>
+</form>
+{% endblock %}
