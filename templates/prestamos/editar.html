@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1><i class="bi bi-pencil-square"></i> Editar Préstamo</h1>
+
+<form method="POST" action="{{ url_for('editar_prestamo', id=prestamo._id) }}">
+    <div class="mb-3">
+        <label class="form-label">Usuario*</label>
+        <select class="form-select" name="usuario_id" required>
+            {% for usuario in usuarios %}
+            <option value="{{ usuario._id }}" 
+                    {% if usuario._id|string == prestamo.usuario_id|string %}selected{% endif %}>
+                {{ usuario.nombre }} {{ usuario.apellido }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Libro*</label>
+        <select class="form-select" name="libro_id" required>
+            {% for libro in libros %}
+            <option value="{{ libro._id }}" 
+                    {% if libro._id|string == prestamo.libro_id|string %}selected{% endif %}>
+                {{ libro.titulo }} (Disponibles: {{ libro.disponibles }})
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Fecha Préstamo*</label>
+            <input type="date" class="form-control" name="fechaPrestamo" 
+                    value="{{ prestamo.fechaPrestamo }}" required>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Estado*</label>
+            <select class="form-select" name="estado" required>
+                <option value="Pendiente" {% if prestamo.estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                <option value="Devuelto" {% if prestamo.estado == 'Devuelto' %}selected{% endif %}>Devuelto</option>
+                <option value="Atrasado" {% if prestamo.estado == 'Atrasado' %}selected{% endif %}>Atrasado</option>
+            </select>
+        </div>
+    </div>
+    
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-save"></i> Actualizar
+    </button>
+    <a href="{{ url_for('prestamos') }}" class="btn btn-secondary">
+        <i class="bi bi-x-circle"></i> Cancelar
+    </a>
+</form>
+{% endblock %}
