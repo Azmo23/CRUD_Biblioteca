@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1><i class="bi bi-person-lines-fill"></i> Editar Usuario</h1>
+
+<form method="POST" action="{{ url_for('editar_usuario', id=usuario._id) }}">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Nombre*</label>
+            <input type="text" class="form-control" name="nombre" 
+                    value="{{ usuario.nombre }}" required>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Apellido*</label>
+            <input type="text" class="form-control" name="apellido" 
+                    value="{{ usuario.apellido }}" required>
+        </div>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Email*</label>
+        <input type="email" class="form-control" name="email" 
+                value="{{ usuario.email }}" required>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Dirección*</label>
+        <input type="text" class="form-control" name="direccion" 
+                value="{{ usuario.direccion }}" required>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Fecha Nacimiento*</label>
+        <input type="date" class="form-control" name="fechaNacimiento" 
+                value="{{ usuario.fechaNacimiento }}" required>
+    </div>
+    
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-save"></i> Actualizar
+    </button>
+    <a href="{{ url_for('usuarios') }}" class="btn btn-secondary">
+        <i class="bi bi-x-circle"></i> Cancelar
+    </a>
+</form>
+{% endblock %}
