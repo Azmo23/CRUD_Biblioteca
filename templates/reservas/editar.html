@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1><i class="bi bi-pencil-square"></i> Editar Reserva</h1>
+
+<form method="POST" action="{{ url_for('editar_reserva', id=reserva._id) }}">
+    <div class="mb-3">
+        <label class="form-label">Usuario*</label>
+        <select class="form-select" name="usuario_id" required>
+            {% for usuario in usuarios %}
+            <option value="{{ usuario._id }}" 
+                    {% if usuario._id|string == reserva.usuario_id|string %}selected{% endif %}>
+                {{ usuario.nombre }} {{ usuario.apellido }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Libro*</label>
+        <select class="form-select" name="libro_id" required>
+            {% for libro in libros %}
+            <option value="{{ libro._id }}" 
+                    {% if libro._id|string == reserva.libro_id|string %}selected{% endif %}>
+                {{ libro.titulo }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Fecha Reserva*</label>
+        <input type="date" class="form-control" name="fechaReserva" 
+                value="{{ reserva.fechaReserva }}" required>
+    </div>
+    
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-save"></i> Actualizar
+    </button>
+    <a href="{{ url_for('reservas') }}" class="btn btn-secondary">
+        <i class="bi bi-x-circle"></i> Cancelar
+    </a>
+</form>
+{% endblock %}
