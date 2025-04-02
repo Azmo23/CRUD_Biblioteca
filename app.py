@@ -81,6 +81,40 @@ def agregar_libro():
         return redirect(url_for('libros'))
     return render_template('libros/agregar.html')
 
+# Editar Libro - GET (Formulario) / POST (Procesar)
+@app.route('/libros/editar/<id>', methods=['GET', 'POST'])
+def editar_libro(id):
+    if request.method == 'POST':
+        mongo.db.libros.update_one(
+            {'_id': ObjectId(id)},
+            {'$set': {
+                'titulo': request.form['titulo'],
+                'autor': request.form['autor'],
+                'isbn': request.form['isbn'],
+                'categoria': request.form['categoria'],
+                'ejemplares': int(request.form['ejemplares']),
+                'disponibles': int(request.form['ejemplares']) - 
+                    (mongo.db.libros.find_one({'_id': ObjectId(id)})['ejemplares'] - 
+                    mongo.db.libros.find_one({'_id': ObjectId(id)})['disponibles'])
+            }}
+        )
+        flash('Libro actualizado correctamente')
+        return redirect(url_for('libros'))
+    
+    libro = mongo.db.libros.find_one({'_id': ObjectId(id)})
+    return render_template('libros/editar.html', libro=libro)
+
+# Eliminar Libro
+@app.route('/libros/eliminar/<id>')
+def eliminar_libro(id):
+    # Verificar si el libro está en préstamos/reservas activas
+    if mongo.db.prestamos.count_documents({'libro_id': ObjectId(id), 'estado': 'Pendiente'}) > 0:
+        flash('No se puede eliminar: El libro tiene préstamos pendientes', 'error')
+    else:
+        mongo.db.libros.delete_one({'_id': ObjectId(id)})
+        flash('Libro eliminado correctamente')
+    return redirect(url_for('libros'))
+
 # (Implementar editar y eliminar libros similar a usuarios)
 
 # --------------------------
@@ -129,6 +163,44 @@ def agregar_prestamo():
     libros = list(mongo.db.libros.find({'disponibles': {'$gt': 0}}))
     return render_template('prestamos/agregar.html', usuarios=usuarios, libros=libros)
 
+# Editar Préstamo
+@app.route('/prestamos/editar/<id>', methods=['GET', 'POST'])
+def editar_prestamo(id):
+    if request.method == 'POST':
+        mongo.db.prestamos.update_one(
+            {'_id': ObjectId(id)},
+            {'$set': {
+                'usuario_id': ObjectId(request.form['usuario_id']),
+                'libro_id': ObjectId(request.form['libro_id']),
+                'fechaPrestamo': request.form['fechaPrestamo'],
+                'fechaDevolucion': request.form['fechaDevolucion'],
+                'estado': request.form['estado']
+            }}
+        )
+        flash('Préstamo actualizado correctamente')
+        return redirect(url_for('prestamos'))
+    
+    prestamo = mongo.db.prestamos.find_one({'_id': ObjectId(id)})
+    usuarios = list(mongo.db.usuarios.find())
+    libros = list(mongo.db.libros.find())
+    return render_template('prestamos/editar.html', 
+                        prestamo=prestamo,
+                        usuarios=usuarios,
+                        libros=libros)
+
+# Eliminar Préstamo
+@app.route('/prestamos/eliminar/<id>')
+def eliminar_prestamo(id):
+    prestamo = mongo.db.prestamos.find_one({'_id': ObjectId(id)})
+    # Incrementar disponibilidad al eliminar
+    mongo.db.libros.update_one(
+        {'_id': prestamo['libro_id']},
+        {'$inc': {'disponibles': 1}}
+    )
+    mongo.db.prestamos.delete_one({'_id': ObjectId(id)})
+    flash('Préstamo eliminado correctamente')
+    return redirect(url_for('prestamos'))
+
 # --------------------------
 # RUTAS PARA RESERVAS (CRUD)
 # --------------------------
@@ -166,6 +238,37 @@ def agregar_reserva():
     usuarios = list(mongo.db.usuarios.find())
     libros = list(mongo.db.libros.find())
     return render_template('reservas/agregar.html', usuarios=usuarios, libros=libros)
+
+# Editar Reserva
+@app.route('/reservas/editar/<id>', methods=['GET', 'POST'])
+def editar_reserva(id):
+    if request.method == 'POST':
+        mongo.db.reservas.update_one(
+            {'_id': ObjectId(id)},
+            {'$set': {
+                'usuario_id': ObjectId(request.form['usuario_id']),
+                'libro_id': ObjectId(request.form['libro_id']),
+                'fechaReserva': request.form['fechaReserva']
+            }}
+        )
+        flash('Reserva actualizada correctamente')
+        return redirect(url_for('reservas'))
+    
+    reserva = mongo.db.reservas.find_one({'_id': ObjectId(id)})
+    usuarios = list(mongo.db.usuarios.find())
+    libros = list(mongo.db.libros.find())
+    return render_template('reservas/editar.html', 
+                        reserva=reserva,
+                        usuarios=usuarios,
+                        libros=libros)
+
+# Eliminar Reserva
+@app.route('/reservas/eliminar/<id>')
+def eliminar_reserva(id):
+    mongo.db.reservas.delete_one({'_id': ObjectId(id)})
+    flash('Reserva eliminada correctamente')
+    return redirect(url_for('reservas'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
