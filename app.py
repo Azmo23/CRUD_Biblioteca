@@ -10,6 +10,23 @@ app.secret_key = 'clave_secreta_biblioteca'
 app.config["MONGO_URI"] = "mongodb://localhost:27017/biblioteca"
 mongo = PyMongo(app)
 
+from datetime import datetime
+
+@app.route('/')
+def index():
+    # Estadísticas
+    stats = {
+        'total_usuarios': mongo.db.usuarios.count_documents({}),
+        'total_libros': mongo.db.libros.count_documents({}),
+        'prestamos_pendientes': mongo.db.prestamos.count_documents({'estado': 'Pendiente'}),
+        'total_reservas': mongo.db.reservas.count_documents({})
+    }
+    
+    
+    return render_template(
+        'index.html',
+        stats=stats
+    )
 # --------------------------
 # RUTAS PARA USUARIOS (CRUD)
 # --------------------------
