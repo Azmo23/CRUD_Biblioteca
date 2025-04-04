@@ -1,46 +1,55 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card text-white bg-primary">
-            <div class="card-body">
-                <h5 class="card-title"><i class="bi bi-people"></i> Usuarios</h5>
-                <p class="card-text display-6">{{ stats.total_usuarios }}</p>
-                <a href="/usuarios" class="btn btn-light">Ver todos</a>
+<div class="container mt-4">
+    <h1 class="mb-4"><i class="bi bi-house-door"></i> Panel Principal - Biblioteca</h1>
+    
+    <!-- Tarjetas de Resumen -->
+    <div class="row mb-4">
+        <!-- Tarjeta Usuarios -->
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-primary h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-people-fill"></i> Usuarios</h5>
+                    <p class="card-text display-5">{{ stats.total_usuarios }}</p>
+                    <a href="{{ url_for('usuarios') }}" class="btn btn-light btn-sm">Gestionar</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tarjeta Libros -->
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-book-fill"></i> Libros</h5>
+                    <p class="card-text display-5">{{ stats.total_libros }}</p>
+                    <a href="{{ url_for('libros') }}" class="btn btn-light btn-sm">Gestionar</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tarjeta Préstamos -->
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-warning h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-arrow-left-right"></i> Préstamos</h5>
+                    <p class="card-text display-5">{{ stats.prestamos_pendientes }}</p>
+                    <a href="{{ url_for('prestamos') }}" class="btn btn-light btn-sm">Gestionar</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tarjeta Reservas -->
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-info h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-calendar-check"></i> Reservas</h5>
+                    <p class="card-text display-5">{{ stats.total_reservas }}</p>
+                    <a href="{{ url_for('reservas') }}" class="btn btn-light btn-sm">Gestionar</a>
+                </div>
             </div>
         </div>
     </div>
-    <!-- Tarjetas similares para Libros, Préstamos y Reservas -->
-</div>
+    
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="bi bi-arrow-left-right"></i> Últimos Préstamos</h5>
-            </div>
-            <div class="card-body">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Usuario</th>
-                            <th>Libro</th>
-                            <th>Devolución</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for p in ultimos_prestamos %}
-                        <tr>
-                            <td>{{ p.usuario.nombre }}</td>
-                            <td>{{ p.libro.titulo }}</td>
-                            <td>{{ p.fechaDevolucion }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
