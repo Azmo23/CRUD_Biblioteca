@@ -211,7 +211,7 @@ def agregar_prestamo():
         # Registrar préstamo
         prestamo = {
             'usuario_id': ObjectId(request.form['usuario_id']),
-            'libro_id': libro_id,
+            'libro_id': ObjectId(request.form['libro_id']),
             'fechaPrestamo': fecha_prestamo,
             'fechaDevolucion': (datetime.strptime(fecha_prestamo, '%Y-%m-%d') + timedelta(days=7)).strftime('%Y-%m-%d'),
             'estado': 'Pendiente'
