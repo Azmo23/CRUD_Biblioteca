@@ -116,7 +116,7 @@ biblioteca-app/
 ## 🖥Capturas de Pantalla de la aplicación.
 
 **Vista Principal**
-![VistaPrincipal] (https://github.com/Azmo23/CRUD_Biblioteca/blob/main/img/VistaPrincipal.jpg)
+![VistaPrincipal](https://github.com/Azmo23/CRUD_Biblioteca/blob/main/img/VistaPrincipal.jpg)
 
 **Formulario Agregar Usuario**
 ![FormularioAggUsuario](https://github.com/Azmo23/CRUD_Biblioteca/blob/main/img/FormularioUsuario.jpg)
