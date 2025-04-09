@@ -1,8 +1,10 @@
-db.usuario.insertOne({
-    "nombre" : "Carlos",
-    "apellido": "Garcia",
-    "email": "carlos.garcia@example.com",
-    "direccion": "Calle 123, 456",
-    "telefono": "6543210987",
-    "fecha_nacimiento": "15-06-1990",
-})
+[{
+  "_id": {
+    "$oid": "67f67eff1fa2e7f1971dcf5b"
+  },
+  "nombre": "Simón",
+  "apellido": "Alzate",
+  "email": "simon_gamma@outlook.es",
+  "direccion": "calle 79 #49-79",
+  "fechaNacimiento": "2000-06-23"
+}]

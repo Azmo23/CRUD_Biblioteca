@@ -1,7 +1,12 @@
-db.reservar.insertOne({
-    "_id":789,
-    "usuario_id":123,
-    "libro_id": 12,
-    "fecha_reserva": "25-02-2025",
-
-});
+[{
+  "_id": {
+    "$oid": "67f69a36489f6de236e2c32f"
+  },
+  "usuario_id": {
+    "$oid": "67f67eff1fa2e7f1971dcf5b"
+  },
+  "libro_id": {
+    "$oid": "67f681e6567425a51744d845"
+  },
+  "fechaReserva": "2025-04-14"
+}]
