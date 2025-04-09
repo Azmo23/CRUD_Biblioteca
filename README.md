@@ -1,7 +1,6 @@
 
 # 🏛️ Sistema de Gestión Bibliotecaria
 
-![Captura de pantalla](/img/bibliotecaSQL.jpg)
 
 ## 📌 Tabla de Contenidos
 - [Descripción](#-descripción)
@@ -108,6 +107,26 @@ app.config['SECRET_KEY'] = 'tu-clave-secreta'
 ```bash
 python app.py
 ```
+
+## 📈 Diagramas descriptivos.
+**Casos de Uso** 
+![CasosDeUso](https://github.com/Azmo23/CRUD_Biblioteca/blob/CRUD_SQL/img/CasosdeUso.jpg)
+
+## 🖥 Captura de pantalla.
+
+**Vista Principal**
+![VistaPrincipal](https://github.com/Azmo23/CRUD_Biblioteca/blob/CRUD_SQL/img/VistaPrincipal.jpg)
+
+**Formulario para agregar libro**
+![FormularioLibro](https://github.com/Azmo23/CRUD_Biblioteca/blob/CRUD_SQL/img/FormularioLibro.jpg)
+
+**Formulario para registrar prestamo**
+![FormularioRegistro](https://github.com/Azmo23/CRUD_Biblioteca/blob/CRUD_SQL/img/Formularioprestamo.jpg)
+
+**CRUD Usuario**
+![CRUDUsuario](https://github.com/Azmo23/CRUD_Biblioteca/blob/CRUD_SQL/img/CRUDusuario.jpg)
+
+
 
 ## 📂 Estructura del Proyeto
 
