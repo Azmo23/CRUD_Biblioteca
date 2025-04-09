@@ -20,7 +20,7 @@
         <label class="form-label">Libro*</label>
         <select class="form-select" name="libro_id" required>
             <option value="">Seleccionar libro...</option>
-            {% for libro in libros_disponibles %}
+            {% for libro in libros %}
             <option value="{{ libro._id }}">
                 {{ libro.titulo }} ({{ libro.autor }}) - Disponibles: {{ libro.disponibles }}
             </option>
